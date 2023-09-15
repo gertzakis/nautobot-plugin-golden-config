@@ -3,7 +3,18 @@
 
 from datetime import datetime
 
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Platform, Rack, RackGroup, Region, Site
+from nautobot.dcim.models import (
+    Device,
+    DeviceRole,
+    DeviceType,
+    Manufacturer,
+    Platform,
+    Rack,
+    RackGroup,
+    Region,
+    Site,
+    Location,
+)
 from nautobot.extras.datasources.git import ensure_git_repository
 from nautobot.extras.jobs import (
     BooleanVar,
@@ -82,6 +93,7 @@ class FormEntry:  # pylint disable=too-few-public-method
     tenant = MultiObjectVar(model=Tenant, required=False)
     region = MultiObjectVar(model=Region, required=False)
     site = MultiObjectVar(model=Site, required=False)
+    location = MultiObjectVar(model=Location, required=False)
     rack_group = MultiObjectVar(model=RackGroup, required=False)
     rack = MultiObjectVar(model=Rack, required=False)
     role = MultiObjectVar(model=DeviceRole, required=False)
@@ -107,6 +119,7 @@ class ComplianceJob(Job, FormEntry):
     tenant = FormEntry.tenant
     region = FormEntry.region
     site = FormEntry.site
+    location = FormEntry.location
     rack_group = FormEntry.rack_group
     rack = FormEntry.rack
     role = FormEntry.role
@@ -146,6 +159,7 @@ class IntendedJob(Job, FormEntry):
     tenant = FormEntry.tenant
     region = FormEntry.region
     site = FormEntry.site
+    location = FormEntry.location
     rack_group = FormEntry.rack_group
     rack = FormEntry.rack
     role = FormEntry.role
@@ -194,6 +208,7 @@ class BackupJob(Job, FormEntry):
     tenant = FormEntry.tenant
     region = FormEntry.region
     site = FormEntry.site
+    location = FormEntry.location
     rack_group = FormEntry.rack_group
     rack = FormEntry.rack
     role = FormEntry.role
@@ -263,6 +278,7 @@ class AllDevicesGoldenConfig(Job):
     tenant = FormEntry.tenant
     region = FormEntry.region
     site = FormEntry.site
+    location = FormEntry.location
     rack_group = FormEntry.rack_group
     rack = FormEntry.rack
     role = FormEntry.role
@@ -299,6 +315,7 @@ class GenerateConfigPlans(Job, FormEntry):
     tenant = FormEntry.tenant
     region = FormEntry.region
     site = FormEntry.site
+    location = FormEntry.location
     rack_group = FormEntry.rack_group
     rack = FormEntry.rack
     role = FormEntry.role
