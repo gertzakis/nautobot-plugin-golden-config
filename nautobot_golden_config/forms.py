@@ -6,7 +6,18 @@ import json
 import nautobot.extras.forms as extras_forms
 import nautobot.utilities.forms as utilities_forms
 from django import forms
-from nautobot.dcim.models import Device, DeviceRole, DeviceType, Manufacturer, Platform, Rack, RackGroup, Region, Site
+from nautobot.dcim.models import (
+    Device,
+    DeviceRole,
+    DeviceType,
+    Manufacturer,
+    Platform,
+    Rack,
+    RackGroup,
+    Region,
+    Site,
+    Location,
+)
 from nautobot.extras.forms import NautobotBulkEditForm, NautobotFilterForm, NautobotModelForm
 from nautobot.extras.models import DynamicGroup, GitRepository, JobResult, Status, Tag
 from nautobot.tenancy.models import Tenant, TenantGroup
@@ -28,6 +39,7 @@ class ConfigComplianceFilterForm(NautobotFilterForm):
         "tenant",
         "region",
         "site",
+        "location",
         "rack_group_id",
         "rack_id",
         "role",
@@ -55,8 +67,14 @@ class ConfigComplianceFilterForm(NautobotFilterForm):
     site = utilities_forms.DynamicModelMultipleChoiceField(
         queryset=Site.objects.all(), to_field_name="slug", required=False, query_params={"region": "$region"}
     )
+    location = utilities_forms.DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(), to_field_name="slug", required=False, query_params={"site": "$site"}
+    )
     rack_group_id = utilities_forms.DynamicModelMultipleChoiceField(
-        queryset=RackGroup.objects.all(), required=False, label="Rack group", query_params={"site": "$site"}
+        queryset=RackGroup.objects.all(),
+        required=False,
+        label="Rack group",
+        query_params={"site": "$site", "location": "$location"},
     )
     rack_id = utilities_forms.DynamicModelMultipleChoiceField(
         queryset=Rack.objects.all(),
@@ -65,6 +83,7 @@ class ConfigComplianceFilterForm(NautobotFilterForm):
         null_option="None",
         query_params={
             "site": "$site",
+            "location": "$location",
             "group_id": "$rack_group_id",
         },
     )
@@ -485,10 +504,11 @@ class ConfigPlanForm(NautobotModelForm):
 
     tenant_group = utilities_forms.DynamicModelMultipleChoiceField(queryset=TenantGroup.objects.all(), required=False)
     tenant = utilities_forms.DynamicModelMultipleChoiceField(queryset=Tenant.objects.all(), required=False)
-    # Requires https://github.com/nautobot/nautobot-plugin-golden-config/issues/430
-    # location = utilities_forms.DynamicModelMultipleChoiceField(queryset=Location.objects.all(), required=False)
     region = utilities_forms.DynamicModelMultipleChoiceField(queryset=Region.objects.all(), required=False)
     site = utilities_forms.DynamicModelMultipleChoiceField(queryset=Site.objects.all(), required=False)
+    location = utilities_forms.DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(), query_params={"content_types": "dcim.device"}, required=False
+    )
     rack_group = utilities_forms.DynamicModelMultipleChoiceField(queryset=RackGroup.objects.all(), required=False)
     rack = utilities_forms.DynamicModelMultipleChoiceField(queryset=Rack.objects.all(), required=False)
     role = utilities_forms.DynamicModelMultipleChoiceField(queryset=DeviceRole.objects.all(), required=False)
@@ -531,7 +551,7 @@ class ConfigPlanForm(NautobotModelForm):
             "feature",
             "commands",
             "tenant",
-            # "location", Requires https://github.com/nautobot/nautobot-plugin-golden-config/issues/430
+            "location",
             "region",
             "site",
             "rack_group",
