@@ -117,6 +117,18 @@ query ($device_id: ID!) {
         id
       }
     }
+    location{
+      name
+      slug
+      vlans{
+        id
+        name
+        vid
+      }
+      vlan_groups{
+        id
+      }
+    }
     interfaces {
       description
       mac_address
